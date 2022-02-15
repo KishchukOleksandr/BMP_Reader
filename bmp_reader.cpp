@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <array>
 
 #define HEADER_SIZE 14
 #define INFO_SIZE 124
@@ -69,6 +70,24 @@ int main(int argv, const char* argc[])
             std::cout << "x res:\t" << info.data.xResolution << '\n';
             std::cout << "y res:\t" << info.data.yResolution << '\n';
         }
+
+        lseek(fd, header.data.offsetBits, SEEK_SET);
+
+        char *image = new char[info.data.imageSize + 1];
+
+        numRead = read(fd, image, info.data.imageSize);
+        
+
+        if(numRead > 0)
+        {
+            for(int i = 0; i < numRead; i++)
+            {
+                *image++ ^= 0xff;     
+            }
+        }
+
+        lseek(fd, header.data.offsetBits, SEEK_SET);
+        write(fd, image, numRead);
     }
     else
         std::cout << "FILE OPEN ERROR" << '\n';
